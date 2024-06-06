@@ -1,4 +1,8 @@
 import { useState } from "react";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import Container from "@mui/material/Container";
+import { getMP3 } from "../../services";
 
 const App = () => {
   const [urlToConverter, setUrlToConverter] = useState<string>("");
@@ -12,39 +16,41 @@ const App = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const url: string = `https://youtube-mp3-downloader2.p.rapidapi.com/ytmp3/ytmp3/custom/?url=${urlToConverter}&quality=320`;
-    const options = {
-      method: "GET",
-      headers: {
-        "x-rapidapi-key": "f469387336mshdd2a48bd0a882a1p1002b2jsne8836ed405ad",
-        "x-rapidapi-host": "youtube-mp3-downloader2.p.rapidapi.com",
-      },
-    };
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-      if (result.dlink) {
-        setUrlDownload(result.dlink);
-      }
-    } catch (error) {
-      console.log(error);
+    const url = await getMP3(urlToConverter);
+    if (url) {
+      setUrlDownload(url);
     }
   };
 
+  const styles = {
+    padding: "2rem",
+    display: "flex",
+    flexDirection: "column",
+    gap: "2rem",
+    height: "100vh",
+  };
+
   return (
-    <div>
+    <Container maxWidth="sm" sx={styles}>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="urlToConverter"
+        <TextField
           id="urlToConverter"
           value={urlToConverter}
           onChange={handleUrlToConverter}
+          label="Url"
+          variant="outlined"
+          size="small"
         />
-        <button type="submit">Convertir</button>
+        <Button type="submit" variant="contained">
+          Convertir
+        </Button>
       </form>
-      {urlDownload && <a href={urlDownload}>Descargar</a>}
-    </div>
+      {urlDownload && (
+        <Button href={urlDownload} variant="contained" color="success">
+          Descargar
+        </Button>
+      )}
+    </Container>
   );
 };
 
